@@ -21,7 +21,6 @@
   .wish-item { display:flex; align-items:center; gap:6px; }
   .wish-label { font-size:12px; color:#b06a8a; font-weight:600; }
   .wish-fruit { font-size:28px; filter: drop-shadow(0 2px 4px rgba(255,120,170,.4)); animation: wishPulse 2s infinite; }
-  .wish-fruit.hidden-tag { animation:none; opacity:.85; }
   @keyframes wishPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
   .divider { width:1px; height:26px; background:rgba(255,150,190,.4); }
   .wish-hint { font-size:11px; color:#c98aa6; margin-left:auto; text-align:right; line-height:1.35; }
@@ -34,12 +33,57 @@
   .stat .num { font-size:20px; font-weight:800; color:#ff6fa5; }
   .stat .lbl { font-size:11px; color:#a77a92; margin-top:2px; }
 
+  /* 货架区 */
+  .shelf-row {
+    display:grid; grid-template-columns: 1fr 3fr; gap:8px; align-items:stretch;
+  }
+  .shelf-col, .box-col { display:flex; flex-direction:column; }
+  .shelf-title { font-size:11px; color:#b06a8a; font-weight:700; margin-bottom:6px; text-align:center; }
+  .shelf-remain { font-size:11px; color:#ff6fa5; font-weight:800; text-align:center; margin-top:6px; }
+
+  .shelf-area {
+    flex:1; background:rgba(255,255,255,.5); border-radius:16px; padding:10px 6px;
+    border:2px solid rgba(255,150,190,.3);
+    display:flex; justify-content:center; align-items:center; position:relative;
+    min-height:120px; cursor:pointer; transition: box-shadow .25s, border-color .25s;
+  }
+  .shelf-area.active-hint { border-color:#ffd84d; animation: shelfBreath 1.2s infinite; }
+  @keyframes shelfBreath {
+    0%,100%{ box-shadow:0 0 0 2px rgba(255,216,77,.5), 0 0 10px rgba(255,216,77,.4); }
+    50%{ box-shadow:0 0 0 4px #ffd84d, 0 0 22px #ffd84d; }
+  }
+  .shelf-area.empty { opacity:.45; cursor:default; filter:grayscale(1); }
+
+  /* 一摞错位叠放的盲盒 */
+  .stack { position:relative; width:52px; height:64px; }
+  .stack .sbox {
+    position:absolute; width:42px; height:42px; border-radius:9px;
+    background: linear-gradient(145deg,#ffc4db,#ff9cc4);
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    box-shadow: 2px 2px 0 #e0709f;
+  }
+  .stack .sbox:nth-child(1){ left:0; top:18px; transform:rotate(-8deg); }
+  .stack .sbox:nth-child(2){ left:6px; top:10px; transform:rotate(4deg); }
+  .stack .sbox:nth-child(3){ left:2px; top:2px; transform:rotate(-3deg); }
+  .stack .sbox:nth-child(4){ left:8px; top:0; transform:rotate(7deg); opacity:.9; }
+
+  /* 堆叠盲盒 */
+  .shelf-box {
+    width:46px; height:46px; border-radius:10px; border:none; cursor:pointer; position:relative;
+    background: linear-gradient(145deg,#ffc4db,#ff9cc4);
+    box-shadow: 3px 3px 0 #e0709f, 6px 6px 0 #d9568a;
+    display:flex; align-items:center; justify-content:center; font-size:20px;
+    transition: transform .1s;
+  }
+  .shelf-box:active { transform:translate(2px,2px); box-shadow:1px 1px 0 #e0709f, 3px 3px 0 #d9568a; }
+
+  /* 拆包区 */
   .box-area {
     background:rgba(255,255,255,.55); border-radius:18px; padding:12px; min-height:88px;
     display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center;
     border:2px dashed rgba(255,150,190,.4);
   }
-  .box-empty { font-size:13px; color:#c9a3b8; }
+  .box-empty { font-size:13px; color:#c9a3b8; text-align:center; }
   .blindbox {
     width:56px; height:56px; border-radius:14px; border:none; cursor:pointer;
     background: linear-gradient(145deg,#ffb3d1,#ff8fbf);
@@ -56,13 +100,13 @@
   }
 
   .board {
-    background:rgba(255,255,255,.65); border-radius:20px; padding:12px; min-height:220px;
+    background:rgba(255,255,255,.65); border-radius:20px; padding:10px; min-height:180px;
     display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-content:start;
     box-shadow:inset 0 2px 12px rgba(255,170,200,.25); position:relative;
   }
   .fruit {
     aspect-ratio:1/1; border-radius:16px; background:#fff;
-    display:flex; align-items:center; justify-content:center; font-size:30px;
+    display:flex; align-items:center; justify-content:center; font-size:26px;
     box-shadow:0 3px 8px rgba(200,150,180,.25); cursor:grab; position:relative;
     transition: transform .1s, box-shadow .1s; touch-action:none;
   }
@@ -106,6 +150,7 @@
     background:rgba(255,255,255,.85); color:#b06a8a; box-shadow:0 4px 10px rgba(255,150,190,.25);
     border:1.5px solid rgba(255,150,190,.5);
   }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
 
   .overlay {
     position:fixed; inset:0; background:rgba(90,61,78,.45); display:none;
@@ -119,6 +164,19 @@
   @keyframes modalIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
   .modal h2 { color:#ff6fa5; font-size:20px; margin-bottom:8px; }
   .modal p { font-size:14px; color:#8a6478; margin-bottom:18px; line-height:1.6; }
+
+  .ticket {
+    background:#fffdf7; border-radius:18px; padding:22px 20px; width:100%; max-width:320px;
+    box-shadow:0 20px 50px rgba(90,61,78,.35); animation: modalIn .3s;
+    border:1px dashed rgba(255,150,190,.6);
+  }
+  .ticket-head { text-align:center; font-size:16px; font-weight:800; color:#ff6fa5; margin-bottom:14px; }
+  .ticket-row {
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:14px; color:#8a6478; padding:6px 0;
+  }
+  .ticket-row b { color:#5a3d4e; font-size:15px; }
+  .ticket-dash { border-top:1px dashed rgba(255,150,190,.6); margin:12px 0 16px; }
 
   .set-section { text-align:left; margin-bottom:16px; }
   .set-section .sec-title { font-size:13px; font-weight:700; color:#b06a8a; margin-bottom:8px; }
@@ -143,6 +201,27 @@
   }
   .dock-inner { width:100%; max-width:520px; display:flex; gap:10px; }
   .dock-inner .btn { padding:12px; font-size:15px; }
+
+/* 清台烟花 */
+  .firework-particle {
+    position:fixed; width:8px; height:8px; border-radius:50%; pointer-events:none;
+    z-index:998; animation: fwFly .9s ease-out forwards;
+  }
+  @keyframes fwFly {
+    0% { transform:translate(0,0) scale(1); opacity:1; }
+    100% { transform:translate(var(--dx), var(--dy)) scale(0.2); opacity:0; }
+  }
+  .float-score.firework-text {
+    font-size:24px; color:#ff3d8b;
+    text-shadow:0 0 8px #fff, 0 0 16px #ffb3d1;
+    animation: fwText 1.2s ease-out forwards;
+  }
+  @keyframes fwText {
+    0% { transform:translate(-50%,-50%) scale(0.5); opacity:0; }
+    30% { transform:translate(-50%,-50%) scale(1.25); opacity:1; }
+    70% { transform:translate(-50%,-70%) scale(1); opacity:1; }
+    100% { transform:translate(-50%,-120%) scale(1); opacity:0; }
+  }
 </style>
 </head>
 <body>
@@ -155,20 +234,32 @@
     <div class="divider"></div>
     <div class="wish-item">
       <span class="wish-label">隐藏</span>
-      <span class="wish-fruit hidden-tag" id="hiddenFruit">❓</span>
+      <span class="wish-fruit" id="hiddenFruit">🥑</span>
     </div>
     <span class="wish-hint">拆到各 +1 包</span>
   </div>
 
   <div class="stats">
     <div class="stat"><div class="num" id="statPairs">0</div><div class="lbl">碰对数</div></div>
-    <div class="stat"><div class="num" id="statBoxes">0</div><div class="lbl">待拆盲盒</div></div>
-    <div class="stat"><div class="num" id="statClear">0</div><div class="lbl">清台次数</div></div>
+    <div class="stat"><div class="num" id="statShelf">0</div><div class="lbl">货架剩余</div></div>
+    <div class="stat"><div class="num" id="statPending">0</div><div class="lbl">待拆</div></div>
+    <div class="stat"><div class="num" id="statClear">0</div><div class="lbl">清台</div></div>
   </div>
 
-  <div class="box-area" id="boxArea"></div>
+  <div class="shelf-row">
+    <div class="shelf-col">
+      <div class="shelf-title">📦 货架</div>
+      <div class="shelf-area" id="shelfArea"></div>
+      <div class="shelf-remain" id="shelfRemain"></div>
+    </div>
+    <div class="box-col">
+      <div class="shelf-title">🎁 待拆区</div>
+      <div class="box-area" id="boxArea"></div>
+    </div>
+  </div>
+
   <div class="board" id="board"></div>
-  <div class="tip" id="tip">点盲盒开始拆包吧～</div>
+  <div class="tip" id="tip">确认小票后开始拆包吧～</div>
   <div class="actions" id="actions"></div>
 </div>
 
@@ -186,10 +277,21 @@
   </div>
 </div>
 
+<div class="overlay" id="ticketOverlay">
+  <div class="ticket">
+    <div class="ticket-head">🎫 下单小票</div>
+    <div class="ticket-row"><span>用户</span><b id="ticketUser">—</b></div>
+    <div class="ticket-row"><span>下单</span><b id="ticketCount">—</b></div>
+    <div class="ticket-row"><span>许愿款</span><b id="ticketWish">—</b></div>
+    <div class="ticket-row"><span>隐藏款</span><b id="ticketHidden">—</b></div>
+    <div class="ticket-dash"></div>
+    <button class="btn green" id="btnTicketConfirm">确认，开拆！</button>
+  </div>
+</div>
+
 <div class="overlay" id="setOverlay">
   <div class="modal">
     <h2>本单设置</h2>
-
     <div class="set-section">
       <div class="sec-title">主题</div>
       <div class="seg" id="themeSeg">
@@ -198,15 +300,6 @@
         <button data-theme="animal">动物</button>
       </div>
     </div>
-
-    <div class="set-section">
-      <div class="sec-title">音效</div>
-      <div class="seg" id="soundSeg">
-        <button data-sound="on">🔊 开</button>
-        <button data-sound="off">🔇 关</button>
-      </div>
-    </div>
-
     <div class="set-section">
       <div class="sec-title">模式</div>
       <div class="seg" id="modeSeg">
@@ -214,7 +307,6 @@
         <button data-mode="random">随缘拆</button>
       </div>
     </div>
-
     <div class="set-section" id="manualSection">
       <div class="sec-title">盲盒数</div>
       <div class="opt-row" id="countRow">
@@ -225,7 +317,13 @@
       <div class="sec-title" style="margin-top:12px;">许愿款（不含隐藏）</div>
       <div class="opt-row fruits" id="wishRow"></div>
     </div>
-
+    <div class="set-section">
+      <div class="sec-title">音效</div>
+      <div class="seg" id="soundSeg">
+        <button data-sound="on">🔊 开</button>
+        <button data-sound="off">🔇 关</button>
+      </div>
+    </div>
     <div class="actions" style="margin-top:6px;">
       <button class="btn green" id="btnRestartNow">立即重开这单</button>
       <button class="btn" id="btnApplyClose">应用并关闭</button>
@@ -237,15 +335,12 @@
 (function(){
   "use strict";
 
-// ===== 合成音效引擎 =====
+  // ===== 合成音效引擎 =====
   let audioCtx = null;
-  // 安卓/Chrome 解锁：任意点击先唤醒 AudioContext
   function unlockAudio(){
     const ctx = getAudioCtx();
     if(ctx && ctx.state === "suspended") ctx.resume();
   }
-  document.addEventListener("pointerdown", unlockAudio, { passive:true });
-  document.addEventListener("touchstart", unlockAudio, { passive:true });
   function getAudioCtx(){
     if(!audioCtx){
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -272,60 +367,52 @@
     osc.stop(t0 + duration + 0.05);
   }
   const SFX = {
-    open(){   // 拆包：短促"啵"
-      playTone(520, 0.09, "sine", 0.16, 0);
-      playTone(780, 0.08, "sine", 0.12, 0.05);
-    },
-    match(){  // 碰掉："啪"两连
-      playTone(300, 0.07, "square", 0.12, 0);
-      playTone(620, 0.10, "triangle", 0.14, 0.04);
-    },
-    hidden(){ // 隐藏：上行"叮叮~"
+    open(){ playTone(520, 0.09, "sine", 0.16, 0); playTone(780, 0.08, "sine", 0.12, 0.05); },
+    match(){ playTone(300, 0.07, "square", 0.12, 0); playTone(620, 0.10, "triangle", 0.14, 0.04); },
+    hidden(){
       playTone(660, 0.12, "sine", 0.16, 0);
       playTone(880, 0.12, "sine", 0.16, 0.10);
       playTone(1180, 0.18, "sine", 0.15, 0.20);
     },
-    wish(){   // 许愿：上行两连，比隐藏柔和
-      playTone(700, 0.13, "triangle", 0.15, 0);
-      playTone(990, 0.18, "triangle", 0.14, 0.11);
+    wish(){ playTone(700, 0.13, "triangle", 0.15, 0); playTone(990, 0.18, "triangle", 0.14, 0.11); },
+    take(){   // 拿盒子：短促"嗒"
+      playTone(440, 0.06, "triangle", 0.14, 0);
+    },
+    milk(){   // 奶一口：软糯"嘟"
+      playTone(560, 0.10, "sine", 0.15, 0);
+      playTone(700, 0.12, "sine", 0.12, 0.07);
+    },
+    clear(){  // 清台：上行欢快三连
+      playTone(660, 0.12, "triangle", 0.16, 0);
+      playTone(880, 0.12, "triangle", 0.16, 0.10);
+      playTone(1320, 0.22, "triangle", 0.15, 0.20);
     }
   };
 
-  // ===== 主题配置：8 普通 + 1 隐藏 =====
+  // ===== 主题 =====
   const THEMES = {
-    fruit: {
-      name: "水果",
-      normals: ["🥭","🍍","🍓","🍉","🍊","🍇","🍋","🍑"],
-      hidden: "🥑"
-    },
-    food: {
-      name: "食物",
-      normals: ["🍔","🍗","🍞","🍤","🍪","🍧","🍮","🍜"],
-      hidden: "🍣"
-    },
-    animal: {
-      name: "动物",
-      normals: ["🐟","🐹","🐻","🦊","🐶","🐨","🦁","🐵"],
-      hidden: "🦄"
-    }
+    fruit: { name:"水果", normals:["🥭","🍍","🍓","🍉","🍊","🍇","🍋","🍑"], hidden:"🥑" },
+    food:  { name:"食物", normals:["🍔","🍗","🍞","🍤","🍪","🍧","🍮","🍜"], hidden:"🍣" },
+    animal:{ name:"动物", normals:["🐟","🐹","🐻","🦊","🐶","🐨","🦁","🐵"], hidden:"🦄" }
   };
   const HIDDEN_RATE = 0.03;
   const CLEAR_BONUS = 3;
   const MILK_LIMIT = { 2:0, 4:2, 9:3 };
 
-  const config = {
-    theme: "fruit",
-    mode: "random",
-    count: 9,
-    wish: THEMES.fruit.normals[0],
-    sound: true
-  };
+  const USERNAMES = [
+    "撒娇只是顺手","来碗忘情牛肉面","你酸奶根葱","我芝士服了","鱼鱼一鱼",
+    "抹茶起电","芝士就是力量","吾乃天之饺子","你美式吧","无事不登麦当劳",
+    "土豆你个西红柿","你芝士甘薯么","奶盖不加糖","拆包小能手","水果姐本姐",
+    "今天也要欧","碰碰不生气","盲盒收割机","许愿必中","隐藏款收藏家"
+  ];
 
+  const config = { theme:"fruit", mode:"random", count:9, wish:THEMES.fruit.normals[0], sound:true };
   let state = {};
 
   const $ = id => document.getElementById(id);
-  const boardEl = $("board"), boxAreaEl = $("boxArea"), tipEl = $("tip"),
-        actionsEl = $("actions"), overlayEl = $("overlay"), setOverlayEl = $("setOverlay");
+  const boardEl = $("board"), boxAreaEl = $("boxArea"), shelfAreaEl = $("shelfArea"),
+        tipEl = $("tip"), actionsEl = $("actions"), overlayEl = $("overlay"),
+        setOverlayEl = $("setOverlay"), ticketOverlayEl = $("ticketOverlay");
 
   const rand = n => Math.floor(Math.random()*n);
   const pick = arr => arr[rand(arr.length)];
@@ -347,57 +434,100 @@
     const t = curTheme();
     const startCount = getStartCount();
     const wish = config.mode === "manual" ? config.wish : pick(t.normals);
+    const username = pick(USERNAMES);
     state = {
+      username,
+      ticketShown: true,
       theme: config.theme,
       wish,
       hidden: t.hidden,
       startCount,
       milkLimit: MILK_LIMIT[startCount] ?? 0,
       milkUsed: 0,
-      boxes: startCount,
+      shelf: startCount,   // 货架上待拿的盒子数
+      pending: 0,          // 已拿进拆包区、待拆的盒子数
+      batchSize: startCount, // 本批"拿满"的目标数
       fruits: [],
       pairs: 0,
       clears: 0,
       totalFruits: 0,
-      hiddenCount: 0,    // 本单拆出隐藏次数
-      wishCount: 0,      // 本单许愿中次数
-      clearBonusTotal: 0, // 本单清台累计奖励包数
-      phase: "open",
+      hiddenCount: 0,
+      wishCount: 0,
+      clearBonusTotal: 0,
+      phase: "shelf",      // shelf=拿盒子, open=拆包, match=碰, end=结束
       ended: false,
       uid: 0
     };
     overlayEl.classList.remove("show");
     renderAll();
-    setTip("点盲盒开始拆包吧～");
+    renderTicket();
+    setTip("确认小票后，去货架拿盒子吧～");
   }
 
   // ===== 渲染 =====
   function renderAll(){
-    renderWish(); renderStats(); renderBoxes(); renderBoard(); renderActions();
+    renderWish(); renderStats(); renderShelf(); renderBoxes(); renderBoard(); renderActions();
   }
   function renderWish(){
     $("wishFruit").textContent = state.wish;
-    $("hiddenFruit").textContent = state.hidden; // 顶部直接显示隐藏真身？见下方说明
+    $("hiddenFruit").textContent = state.hidden;
   }
   function renderStats(){
     $("statPairs").textContent = state.pairs;
-    $("statBoxes").textContent = state.boxes;
+    $("statShelf").textContent = state.shelf;
+    $("statPending").textContent = state.pending;
     $("statClear").textContent = state.clears;
+  }
+  function renderShelf(){
+    shelfAreaEl.innerHTML = "";
+    const needTake = (state.phase === "shelf" && state.shelf > 0 && state.pending < state.batchSize);
+    shelfAreaEl.classList.toggle("active-hint", needTake);
+    shelfAreaEl.classList.toggle("empty", state.shelf <= 0);
+
+    $("shelfRemain").textContent = state.shelf > 0 ? `剩 ${state.shelf} 个` : "";
+
+    if(state.shelf <= 0){
+      // 货架空：保留一摞灰掉的图标，不写字
+      const stack = document.createElement("div");
+      stack.className = "stack";
+      for(let i=0;i<4;i++){
+        const b = document.createElement("div");
+        b.className = "sbox";
+        b.textContent = "🎁";
+        stack.appendChild(b);
+      }
+      shelfAreaEl.appendChild(stack);
+      return;
+    }
+
+    // 一摞固定 3~4 个叠放图标，不随数量变化
+    const stack = document.createElement("div");
+    stack.className = "stack";
+    for(let i=0;i<4;i++){
+      const b = document.createElement("div");
+      b.className = "sbox";
+      b.textContent = "🎁";
+      stack.appendChild(b);
+    }
+    stack.addEventListener("click", takeFromShelf);
+    shelfAreaEl.appendChild(stack);
   }
   function renderBoxes(){
     boxAreaEl.innerHTML = "";
-    if(state.boxes <= 0){
+    if(state.pending <= 0){
       const e = document.createElement("div");
       e.className = "box-empty";
-      e.textContent = state.phase === "match" ? "盲盒拆完啦，去台面碰一碰！" : "暂无盲盒";
+      e.textContent = state.phase === "shelf"
+        ? "点左边货架拿盒子，拿满就能拆啦"
+        : (state.phase === "match" ? "拆包区空啦，去台面碰一碰！" : "暂无待拆");
       boxAreaEl.appendChild(e);
       return;
     }
-    for(let i=0;i<state.boxes;i++){
+    for(let i=0;i<state.pending;i++){
       const b = document.createElement("button");
       b.className = "blindbox";
       b.textContent = "🎁";
-      b.addEventListener("click", () => openBox(b));
+      b.addEventListener("click", openBox);
       boxAreaEl.appendChild(b);
     }
   }
@@ -418,62 +548,117 @@
   function renderActions(){
     actionsEl.innerHTML = "";
     if(state.ended) return;
-    if(state.phase === "match" && state.boxes === 0){
-      const btnMilk = document.createElement("button");
-      btnMilk.className = "btn green";
-      btnMilk.textContent = "🍼 奶一口";
-      btnMilk.addEventListener("click", milkOne);
-      if(state.milkUsed < state.milkLimit) btnMilk.classList.add("breath");
 
-      const btnEnd = document.createElement("button");
-      btnEnd.className = "btn";
-      btnEnd.textContent = "结束这单";
-      btnEnd.addEventListener("click", endRound);
+    // match 阶段就显示按钮；货架有盒子时"去拿"可点，"结束"会被拦
+    if(state.phase !== "match") return;
+    if(state.pending > 0) return;
 
-      actionsEl.appendChild(btnMilk);
-      actionsEl.appendChild(btnEnd);
+    // 奶一口
+    const btnMilk = document.createElement("button");
+    btnMilk.className = "btn green";
+    btnMilk.style.flex = "0 0 25%";
+    btnMilk.style.padding = "14px 6px";
+    btnMilk.style.fontSize = "15px";
+    btnMilk.textContent = "🍼 奶";
+    btnMilk.addEventListener("click", milkOne);
+    if(state.milkUsed < state.milkLimit) btnMilk.classList.add("breath");
 
-      if(state.milkUsed < state.milkLimit){
-        const left = state.milkLimit - state.milkUsed;
-        setTip(`还可以奶 ${left} 口哦～（已奶 ${state.milkUsed}/${state.milkLimit}）`);
-      }
+    // 去拿盒子（有货架才显示/可点）
+    const btnGo = document.createElement("button");
+    btnGo.className = "btn";
+    btnGo.style.flex = "0 0 25%";
+    btnGo.style.padding = "14px 6px";
+    btnGo.style.fontSize = "15px";
+    btnGo.textContent = "📦 去拿";
+    btnGo.disabled = state.shelf <= 0;
+    btnGo.addEventListener("click", goTakeBoxes);
+
+    // 结束这单
+    const btnEnd = document.createElement("button");
+    btnEnd.className = "btn";
+    btnEnd.style.flex = "1";
+    btnEnd.textContent = "结束这单";
+    btnEnd.addEventListener("click", endRound);
+
+    actionsEl.appendChild(btnMilk);
+    actionsEl.appendChild(btnGo);
+    actionsEl.appendChild(btnEnd);
+
+    if(state.milkUsed < state.milkLimit){
+      const left = state.milkLimit - state.milkUsed;
+      setTip(`还可以奶 ${left} 口哦～（已奶 ${state.milkUsed}/${state.milkLimit}）`);
     }
   }
   function setTip(t){ tipEl.textContent = t; }
 
+  // ===== 货架拿盒子 =====
+  function takeFromShelf(){
+    if(state.ticketShown) return;
+    if(state.phase !== "shelf") return;
+    if(state.shelf <= 0) return;
+    if(state.pending >= state.batchSize) return; // 拿满了
+
+    state.shelf--;
+    state.pending++;
+    renderAll();
+    SFX.take();
+
+    if(state.pending >= state.batchSize){
+      // 拿满，进入拆包
+      state.phase = "open";
+      renderAll();
+      setTip("拿满啦，点盒子开拆吧～");
+    } else {
+      setTip(`还差 ${state.batchSize - state.pending} 个，继续拿～`);
+    }
+  }
+
   // ===== 拆包 =====
-  function openBox(btn){
-    if(state.boxes <= 0 || state.phase !== "open") return;
+  function openBox(){
+    if(state.ticketShown) return;
+    if(state.phase !== "open") return;
+    if(state.pending <= 0) return;
+
+    const btn = event.currentTarget;
     if(btn.dataset.busy) return;
     btn.dataset.busy = "1";
     btn.classList.add("opening");
-    const type = rollFruit();
     SFX.open();
+    const type = rollFruit();
 
     setTimeout(() => {
-      state.boxes--;
+      state.pending--;
       state.totalFruits++;
       state.fruits.push({ id: ++state.uid, type });
       let msg = `拆到 ${type}！`;
 
       if(type === state.hidden){
-        state.boxes++;
+        state.shelf++;
         state.hiddenCount++;
-        SFX.hidden();
         msg += ` 隐藏款！+1 包 ✨`;
         floatText(btn, "隐藏！+1 包", true);
+        SFX.hidden();
       } else if(type === state.wish){
-        state.boxes++;
+        state.shelf++;
         state.wishCount++;
-        SFX.wish();
         msg += ` 许愿中！+1 包 🎉`;
         floatText(btn, "许愿 +1 包");
+        SFX.wish();
       }
 
       renderAll();
       setTip(msg);
 
-      if(state.boxes <= 0){
+      if(state.pending <= 0){
+        // 拆完当前这批，若有货架新增（许愿/隐藏），先回去拿
+        if(state.shelf > 0){
+          state.phase = "shelf";
+          state.batchSize = 1; // 许愿/隐藏各 +1，拿 1 个
+          state.pending = 0;
+          renderAll();
+          setTip("有许愿/隐藏加的包，去货架拿 1 个～");
+          return;
+        }
         state.phase = "match";
         renderAll();
         checkClearOrMatch();
@@ -484,14 +669,24 @@
   // ===== 奶一口 =====
   function milkOne(){
     if(state.phase !== "match") return;
-    state.boxes += 1;
+    state.shelf += 1;
     state.milkUsed++;
-    state.phase = "open";
     renderAll();
-    setTip("奶一口！再拆一个～");
+    SFX.milk();
+    setTip(`奶了一口！货架 +1（已奶 ${state.milkUsed}${state.milkLimit>0?"/"+state.milkLimit:""}），可以继续奶或点「去拿盒子」`);
   }
 
-  // ===== 拖动 =====
+function goTakeBoxes(){
+    if(state.phase !== "match") return;
+    if(state.shelf <= 0) return;
+    state.phase = "shelf";
+    state.batchSize = state.shelf;   // 货架上有几个就一次拿几个
+    state.pending = 0;
+    renderAll();
+    setTip(`去货架把 ${state.shelf} 个盒子都拿下来拆～`);
+  }
+
+  // ===== 拖动碰 =====
   let dragEl = null, dragType = null, offsetX=0, offsetY=0;
   function attachDrag(el){ el.addEventListener("pointerdown", onDown); }
 
@@ -523,13 +718,11 @@
     document.addEventListener("pointerup", onUp);
     document.addEventListener("pointercancel", onUp);
   }
-
   function onMove(e){
     if(!dragEl) return;
     dragEl.style.left = (e.clientX - offsetX) + "px";
     dragEl.style.top  = (e.clientY - offsetY) + "px";
   }
-
   function onUp(e){
     document.removeEventListener("pointermove", onMove);
     document.removeEventListener("pointerup", onUp);
@@ -543,22 +736,15 @@
     const targetFruit = target && target.closest ? target.closest(".fruit") : null;
 
     if(targetFruit && targetFruit.dataset.id !== el.dataset.id){
-      if(targetFruit.dataset.type === dragType){
-        doMatch(el, targetFruit);
-        return;
-      } else {
-        returnToSlot(el, true);
-        return;
-      }
+      if(targetFruit.dataset.type === dragType){ doMatch(el, targetFruit); return; }
+      else { returnToSlot(el, true); return; }
     }
     returnToSlot(el, false);
   }
-
   function removeGhost(el){
     const g = el.parentNode && el.parentNode.querySelector(".ghost-placeholder");
     if(g) g.remove();
   }
-
   function returnToSlot(el, shake){
     el.classList.remove("dragging");
     el.style = "";
@@ -574,6 +760,7 @@
     const idB = Number(targetFruit.dataset.id);
     const r = targetFruit.getBoundingClientRect();
     floatAt(r.left + r.width/2, r.top, "碰！+1 包");
+    SFX.match();
 
     el.style = "";
     el.classList.remove("dragging");
@@ -582,43 +769,81 @@
     targetFruit.classList.add("pop");
 
     const type = el.dataset.type;
-    SFX.match();
 
     setTimeout(() => {
       state.fruits = state.fruits.filter(f => f.id !== idA && f.id !== idB);
       state.pairs++;
-      state.boxes++;
+
+      // ===== 清台特殊：碰最后一对 + 清台合并 =====
+      const isClear = (state.fruits.length === 0);
+      let addBoxes = 1; // 碰对本身 +1
+      if(isClear){
+        state.clears++;
+        addBoxes += CLEAR_BONUS; // 再加 3
+        state.clearBonusTotal += CLEAR_BONUS;
+      }
+      // 碰对 +1（清台时合并 +3），先全部加到货架，不切阶段
+      state.shelf += addBoxes;
+      state.pending = 0;
+
+      if(isClear){
+        state.clearBonusTotal += CLEAR_BONUS;
+        setTip(`清台啦！碰对 +1 与清台 +${CLEAR_BONUS} 合并，货架 +${addBoxes} 包～`);
+        // 烟花 + 飘字，位置取台面中心
+        const br = boardEl.getBoundingClientRect();
+        firework(br.left + br.width/2, br.top + br.height/2, `清台！+${addBoxes} 包`);
+        SFX.clear();
+      } else {
+        setTip(`碰掉一对 ${type}！货架 +1 包～`);
+      }
+
+      // 留在碰阶段：台面还有可碰就继续碰，全碰完再统一去货架
+      const typesNow = state.fruits.map(f=>f.type);
+      const stillHasPair = typesNow.some((t,i)=>typesNow.indexOf(t,i+1) !== -1);
+      if(stillHasPair){
+        state.phase = "match";
+        renderAll();
+        return;
+      }
+      // 没得碰了，货架有盒子就去拿
+      if(state.shelf > 0){
+        state.phase = "shelf";
+        state.batchSize = state.shelf; // 全碰完，一次性把货架上的都拿完
+        state.pending = 0;
+        renderAll();
+        setTip(`碰完啦！去货架把 ${state.shelf} 个盒子都拿下来拆～`);
+        return;
+      }
+      state.phase = "match";
       renderAll();
-      setTip(`碰掉一对 ${type}！+1 包`);
       checkClearOrMatch();
     }, 300);
   }
 
-  // ===== 清台 / 阶段 =====
+  // ===== 阶段判断 =====
   function checkClearOrMatch(){
-    if(state.fruits.length === 0 && state.pairs > 0){
-      state.clears++;
-      state.boxes += CLEAR_BONUS;
-      state.clearBonusTotal += CLEAR_BONUS;
-      state.phase = "open";
+    // 有货架 / 有待拆 → 先处理盒子
+    if(state.shelf > 0 || state.pending > 0){
+      if(state.pending > 0){
+        state.phase = "open";
+      } else {
+        state.phase = "shelf";
+        state.batchSize = Math.min(state.batchSize, state.shelf);
+        if(state.batchSize <= 0) state.batchSize = state.shelf;
+      }
       renderAll();
-      setTip(`清台啦！+${CLEAR_BONUS} 包 🎉`);
       return;
     }
+    // 台面还有可碰 → 碰阶段
     const typesNow = state.fruits.map(f=>f.type);
     const stillHasPair = typesNow.some((t,i)=>typesNow.indexOf(t,i+1) !== -1);
     if(stillHasPair){
       state.phase = "match";
       renderAll();
-      setTip("继续碰！盲盒先攒着～");
+      setTip("拖相同水果碰一碰！");
       return;
     }
-    if(state.boxes > 0){
-      state.phase = "open";
-      renderAll();
-      setTip("碰完啦，去拆攒下的盲盒吧～");
-      return;
-    }
+    // 没盒子、没可碰 → 奶/结束
     state.phase = "match";
     renderAll();
     if(state.milkUsed < state.milkLimit){
@@ -641,6 +866,11 @@
 
   function endRound(){
     if(state.ended) return;
+    // 有盒子不允许结束
+    if(state.shelf > 0 || state.pending > 0){
+      setTip("还有盒子没拿完/没拆完，不能结束这单哦～");
+      return;
+    }
     state.ended = true;
     state.phase = "end";
     renderAll();
@@ -670,11 +900,54 @@
     document.body.appendChild(d);
     setTimeout(()=>d.remove(), 800);
   }
+function firework(x, y, text){
+    // 中心飘字
+    const t = document.createElement("div");
+    t.className = "float-score firework-text";
+    t.textContent = text;
+    t.style.left = x + "px";
+    t.style.top = y + "px";
+    t.style.transform = "translate(-50%,-50%)";
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 1300);
+
+    // 粒子
+    const colors = ["#ff6fa5","#ffd84d","#8fe3a8","#9b5cff","#ff9cc4","#6fc8ff"];
+    const count = 24;
+    for(let i=0;i<count;i++){
+      const p = document.createElement("div");
+      p.className = "firework-particle";
+      const angle = (Math.PI * 2 * i) / count + Math.random()*0.3;
+      const dist = 70 + Math.random()*70;
+      p.style.left = x + "px";
+      p.style.top = y + "px";
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty("--dx", Math.cos(angle)*dist + "px");
+      p.style.setProperty("--dy", Math.sin(angle)*dist + "px");
+      p.style.animationDelay = (Math.random()*0.08) + "s";
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(), 1000);
+    }
+  }
+
+  // ===== 小票 =====
+  function renderTicket(){
+    $("ticketUser").textContent = state.username;
+    $("ticketCount").textContent = `拍一拆 ${state.startCount}`;
+    $("ticketWish").textContent = state.wish;
+    $("ticketHidden").textContent = state.hidden;
+    ticketOverlayEl.classList.add("show");
+  }
+  $("btnTicketConfirm").addEventListener("click", ()=>{
+    ticketOverlayEl.classList.remove("show");
+    state.ticketShown = false;
+    renderAll();
+    setTip("去货架拿盒子吧～");
+  });
 
   // ===== 设置 =====
   function openSettings(){ renderSettings(); setOverlayEl.classList.add("show"); }
   function closeSettings(){ setOverlayEl.classList.remove("show"); }
-
   function renderSettings(){
     document.querySelectorAll("#themeSeg button").forEach(b=>{
       b.classList.toggle("active", b.dataset.theme === config.theme);
@@ -708,7 +981,6 @@
   document.querySelectorAll("#themeSeg button").forEach(b=>{
     b.addEventListener("click", ()=>{
       config.theme = b.dataset.theme;
-      // 切主题时许愿款重置为该主题第一个普通款
       config.wish = THEMES[config.theme].normals[0];
       renderSettings();
     });
@@ -722,6 +994,10 @@
   document.querySelectorAll("#countRow button").forEach(b=>{
     b.addEventListener("click", ()=>{ config.count = Number(b.dataset.count); renderSettings(); });
   });
+
+  // 音频解锁
+  document.addEventListener("pointerdown", unlockAudio, { passive:true });
+  document.addEventListener("touchstart", unlockAudio, { passive:true });
 
   newRound();
 })();
