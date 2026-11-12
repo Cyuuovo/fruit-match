@@ -231,6 +231,13 @@
 
 // ===== 合成音效引擎 =====
   let audioCtx = null;
+  // 安卓/Chrome 解锁：任意点击先唤醒 AudioContext
+  function unlockAudio(){
+    const ctx = getAudioCtx();
+    if(ctx && ctx.state === "suspended") ctx.resume();
+  }
+  document.addEventListener("pointerdown", unlockAudio, { passive:true });
+  document.addEventListener("touchstart", unlockAudio, { passive:true });
   function getAudioCtx(){
     if(!audioCtx){
       const AC = window.AudioContext || window.webkitAudioContext;
