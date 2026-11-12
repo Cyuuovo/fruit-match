@@ -112,6 +112,9 @@
   @keyframes modalIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
   .modal h2 { color:#ff6fa5; font-size:20px; margin-bottom:8px; }
   .modal p { font-size:14px; color:#8a6478; margin-bottom:18px; line-height:1.6; }
+
+.ghost-placeholder { visibility:hidden; pointer-events:none; }
+
 </style>
 </head>
 <body>
@@ -318,8 +321,12 @@
     offsetX = e.clientX - rect.left;
     offsetY = e.clientY - rect.top;
 
-    el.classList.add("dragging");
-    el.style.width = rect.width + "px";
+    // 原地留占位，防止其他水果补位
+    const ghost = document.createElement("div");
+    ghost.className = "fruit ghost-placeholder";
+    ghost.style.width = rect.width + "px";
+    ghost.style.height = rect.height + "px";
+    el.parentNode.insertBefore(ghost, el.nextSibling);
     el.style.height = rect.height + "px";
     el.style.position = "fixed";
     el.style.left = startX + "px";
@@ -373,6 +380,8 @@
   function returnToSlot(el, shake){
     el.classList.remove("dragging");
     el.style = "";
+    const g = el.parentNode.querySelector(".ghost-placeholder");
+    if(g) g.remove();
     if(shake){
       el.classList.add("shake-back");
       setTimeout(()=>el.classList.remove("shake-back"), 300);
@@ -391,6 +400,8 @@
     // 标记消失动画
     el.style = "";
     el.classList.remove("dragging");
+    const g = el.parentNode.querySelector(".ghost-placeholder");
+    if(g) g.remove();
     el.classList.add("pop");
     targetFruit.classList.add("pop");
 
@@ -409,8 +420,8 @@
 
   // ===== 清台 / 可碰检测 =====
   function checkClearOrMatch(){
-    // 台面空 = 清台
-    if(state.fruits.length === 0 && state.pairs > 0 && state.boxes === 0){
+    // 台面空 = 清台（不要求盲盒为 0）
+    if(state.fruits.length === 0 && state.pairs > 0){
       state.clears++;
       state.boxes += CLEAR_BONUS;
       state.phase = "open";
