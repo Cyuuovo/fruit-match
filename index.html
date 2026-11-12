@@ -311,7 +311,7 @@
   };
   const HIDDEN_RATE = 0.03;
   const CLEAR_BONUS = 3;
-  const MILK_LIMIT = { 4:2, 9:3 };
+  const MILK_LIMIT = { 2:0, 4:2, 9:3 };
 
   const config = {
     theme: "fruit",
@@ -352,7 +352,7 @@
       wish,
       hidden: t.hidden,
       startCount,
-      milkLimit: MILK_LIMIT[startCount] || 1,
+      milkLimit: MILK_LIMIT[startCount] ?? 0,
       milkUsed: 0,
       boxes: startCount,
       fruits: [],
