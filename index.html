@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>水果对对碰 · 拆包版</title>
+<title>对对碰 · 拆包版</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
@@ -11,20 +11,21 @@
     background: linear-gradient(160deg, #ffe3f1 0%, #ffd6e8 40%, #e8e0ff 100%);
     min-height: 100vh; color:#5a3d4e; user-select:none; overflow-x:hidden;
   }
-  .app { max-width:520px; margin:0 auto; padding:12px 12px 24px; display:flex; flex-direction:column; gap:10px; }
+  .app { max-width:520px; margin:0 auto; padding:12px 12px 100px; display:flex; flex-direction:column; gap:10px; }
 
-  /* 顶部许愿区 */
   .wish-bar {
-    background: rgba(255,255,255,.75); border-radius:18px; padding:10px 14px;
+    background: rgba(255,255,255,.75); border-radius:18px; padding:10px 12px;
     display:flex; align-items:center; gap:10px; box-shadow:0 4px 14px rgba(255,150,190,.25);
     backdrop-filter: blur(6px);
   }
-  .wish-label { font-size:13px; color:#b06a8a; font-weight:600; }
-  .wish-fruit { font-size:30px; filter: drop-shadow(0 2px 4px rgba(255,120,170,.4)); animation: wishPulse 2s infinite; }
+  .wish-item { display:flex; align-items:center; gap:6px; }
+  .wish-label { font-size:12px; color:#b06a8a; font-weight:600; }
+  .wish-fruit { font-size:28px; filter: drop-shadow(0 2px 4px rgba(255,120,170,.4)); animation: wishPulse 2s infinite; }
+  .wish-fruit.hidden-tag { animation:none; opacity:.85; }
   @keyframes wishPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
-  .wish-hint { font-size:11px; color:#c98aa6; margin-left:auto; }
+  .divider { width:1px; height:26px; background:rgba(255,150,190,.4); }
+  .wish-hint { font-size:11px; color:#c98aa6; margin-left:auto; text-align:right; line-height:1.35; }
 
-  /* 计数器 */
   .stats { display:flex; gap:8px; }
   .stat {
     flex:1; background:rgba(255,255,255,.7); border-radius:14px; padding:8px 4px; text-align:center;
@@ -33,7 +34,6 @@
   .stat .num { font-size:20px; font-weight:800; color:#ff6fa5; }
   .stat .lbl { font-size:11px; color:#a77a92; margin-top:2px; }
 
-  /* 盲盒区 */
   .box-area {
     background:rgba(255,255,255,.55); border-radius:18px; padding:12px; min-height:88px;
     display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center;
@@ -52,10 +52,9 @@
   @keyframes shakeBox {
     0%,100%{transform:rotate(0)} 20%{transform:rotate(-10deg) scale(1.05)}
     40%{transform:rotate(9deg) scale(1.05)} 60%{transform:rotate(-6deg)}
-    80%{transform:rotate(4deg)} 
+    80%{transform:rotate(4deg)}
   }
 
-  /* 台面 */
   .board {
     background:rgba(255,255,255,.65); border-radius:20px; padding:12px; min-height:220px;
     display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-content:start;
@@ -78,15 +77,16 @@
   @keyframes popOut { to { transform:scale(0); opacity:0; } }
   .fruit.shake-back { animation: shakeBack .3s; }
   @keyframes shakeBack { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .fruit.hidden-fruit { box-shadow:0 0 0 2px #c78cff, 0 0 14px #c78cff; }
+  .ghost-placeholder { visibility:hidden; pointer-events:none; }
 
-  /* 飘字 */
   .float-score {
     position:fixed; font-weight:800; font-size:18px; color:#ff5b96; pointer-events:none;
     z-index:999; animation: floatUp .8s forwards; text-shadow:0 2px 6px rgba(255,255,255,.9);
   }
+  .float-score.purple { color:#9b5cff; }
   @keyframes floatUp { to { transform:translateY(-46px); opacity:0; } }
 
-  /* 底部提示 + 按钮 */
   .tip { text-align:center; font-size:12.5px; color:#a77a92; min-height:18px; }
   .actions { display:flex; gap:10px; }
   .btn {
@@ -97,61 +97,131 @@
   }
   .btn:active { transform:translateY(3px); box-shadow:0 2px 0 #d9568a; }
   .btn.green { background:linear-gradient(145deg,#8fe3a8,#4fc97a); box-shadow:0 5px 0 #35a860,0 8px 16px rgba(53,168,96,.3); }
-  .btn:disabled { opacity:.5; }
+  .btn.green.breath { animation: milkBreath 1s infinite; }
+  @keyframes milkBreath {
+    0%,100%{ box-shadow:0 5px 0 #35a860,0 8px 16px rgba(53,168,96,.3); }
+    50%{ box-shadow:0 5px 0 #35a860,0 0 0 4px #ffe066,0 0 22px #ffe066; }
+  }
+  .btn.ghost-btn {
+    background:rgba(255,255,255,.85); color:#b06a8a; box-shadow:0 4px 10px rgba(255,150,190,.25);
+    border:1.5px solid rgba(255,150,190,.5);
+  }
 
-  /* 结束弹层 */
   .overlay {
     position:fixed; inset:0; background:rgba(90,61,78,.45); display:none;
     align-items:center; justify-content:center; z-index:100; padding:24px;
   }
   .overlay.show { display:flex; }
   .modal {
-    background:#fff; border-radius:24px; padding:26px 22px; text-align:center; max-width:320px; width:100%;
-    box-shadow:0 20px 50px rgba(90,61,78,.35); animation: modalIn .3s;
+    background:#fff; border-radius:24px; padding:26px 22px; text-align:center; max-width:340px; width:100%;
+    box-shadow:0 20px 50px rgba(90,61,78,.35); animation: modalIn .3s; max-height:86vh; overflow-y:auto;
   }
   @keyframes modalIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
   .modal h2 { color:#ff6fa5; font-size:20px; margin-bottom:8px; }
   .modal p { font-size:14px; color:#8a6478; margin-bottom:18px; line-height:1.6; }
 
-.ghost-placeholder { visibility:hidden; pointer-events:none; }
+  .set-section { text-align:left; margin-bottom:16px; }
+  .set-section .sec-title { font-size:13px; font-weight:700; color:#b06a8a; margin-bottom:8px; }
+  .seg { display:flex; gap:8px; }
+  .seg button {
+    flex:1; padding:10px; border-radius:12px; border:1.5px solid rgba(255,150,190,.5);
+    background:#fff; color:#b06a8a; font-size:14px; font-weight:700; cursor:pointer;
+  }
+  .seg button.active { background:linear-gradient(145deg,#ff9cc4,#ff6fa5); color:#fff; border-color:transparent; }
+  .opt-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .opt-row button {
+    padding:9px 14px; border-radius:12px; border:1.5px solid rgba(255,150,190,.5);
+    background:#fff; color:#b06a8a; font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .opt-row button.active { background:linear-gradient(145deg,#ff9cc4,#ff6fa5); color:#fff; border-color:transparent; }
+  .opt-row.fruits button { font-size:22px; padding:8px 12px; }
+  .hidden { display:none !important; }
 
+  .dock {
+    position:fixed; left:0; right:0; bottom:0; z-index:60;
+    display:flex; justify-content:center; padding:0 12px 12px;
+  }
+  .dock-inner { width:100%; max-width:520px; display:flex; gap:10px; }
+  .dock-inner .btn { padding:12px; font-size:15px; }
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- 许愿区 -->
   <div class="wish-bar">
-    <span class="wish-label">许愿款</span>
-    <span class="wish-fruit" id="wishFruit">🍓</span>
-    <span class="wish-hint">拆到 +1 包</span>
+    <div class="wish-item">
+      <span class="wish-label">许愿</span>
+      <span class="wish-fruit" id="wishFruit">🍓</span>
+    </div>
+    <div class="divider"></div>
+    <div class="wish-item">
+      <span class="wish-label">隐藏</span>
+      <span class="wish-fruit hidden-tag" id="hiddenFruit">❓</span>
+    </div>
+    <span class="wish-hint">拆到各 +1 包</span>
   </div>
 
-  <!-- 计数器 -->
   <div class="stats">
     <div class="stat"><div class="num" id="statPairs">0</div><div class="lbl">碰对数</div></div>
     <div class="stat"><div class="num" id="statBoxes">0</div><div class="lbl">待拆盲盒</div></div>
     <div class="stat"><div class="num" id="statClear">0</div><div class="lbl">清台次数</div></div>
   </div>
 
-  <!-- 盲盒区 -->
   <div class="box-area" id="boxArea"></div>
-
-  <!-- 台面 -->
   <div class="board" id="board"></div>
-
-  <!-- 提示 -->
   <div class="tip" id="tip">点盲盒开始拆包吧～</div>
-
-  <!-- 操作按钮 -->
   <div class="actions" id="actions"></div>
 </div>
 
-<!-- 结束弹层 -->
+<div class="dock">
+  <div class="dock-inner">
+    <button class="btn ghost-btn" id="btnSettings">⚙️ 设置</button>
+  </div>
+</div>
+
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="modalTitle">本单结束啦！</h2>
-    <p id="modalText"></p >
+    <p id="modalText"></p>
     <button class="btn" id="btnRestart">再来一单</button>
+  </div>
+</div>
+
+<div class="overlay" id="setOverlay">
+  <div class="modal">
+    <h2>本单设置</h2>
+
+    <div class="set-section">
+      <div class="sec-title">主题</div>
+      <div class="seg" id="themeSeg">
+        <button data-theme="fruit">水果</button>
+        <button data-theme="food">食物</button>
+        <button data-theme="animal">动物</button>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="sec-title">模式</div>
+      <div class="seg" id="modeSeg">
+        <button data-mode="manual">我来定</button>
+        <button data-mode="random">随缘拆</button>
+      </div>
+    </div>
+
+    <div class="set-section" id="manualSection">
+      <div class="sec-title">盲盒数</div>
+      <div class="opt-row" id="countRow">
+        <button data-count="2">2 个</button>
+        <button data-count="4">4 个</button>
+        <button data-count="9">9 个</button>
+      </div>
+      <div class="sec-title" style="margin-top:12px;">许愿款（不含隐藏）</div>
+      <div class="opt-row fruits" id="wishRow"></div>
+    </div>
+
+    <div class="actions" style="margin-top:6px;">
+      <button class="btn green" id="btnRestartNow">立即重开这单</button>
+      <button class="btn" id="btnApplyClose">应用并关闭</button>
+    </div>
   </div>
 </div>
 
@@ -159,34 +229,79 @@
 (function(){
   "use strict";
 
-  // ===== 水果池 =====
-  const FRUITS = ["🍎","🍓","🍇","🍊","🍉","🍌"];
-  const CLEAR_BONUS = 3; // 清台奖励包数
+  // ===== 主题配置：8 普通 + 1 隐藏 =====
+  const THEMES = {
+    fruit: {
+      name: "水果",
+      normals: ["🥭","🍍","🍓","🍉","🍊","🍇","🍋","🍑"],
+      hidden: "🥑"
+    },
+    food: {
+      name: "食物",
+      normals: ["🍔","🍗","🍞","🍤","🍪","🍧","🍮","🍜"],
+      hidden: "🍣"
+    },
+    animal: {
+      name: "动物",
+      normals: ["🐟","🐹","🐻","🦊","🐶","🐨","🦁","🐵"],
+      hidden: "🦄"
+    }
+  };
+  const HIDDEN_RATE = 0.045;
+  const CLEAR_BONUS = 3;
+  const MILK_LIMIT = { 2:1, 4:2, 9:3 };
 
-  // ===== 状态 =====
+  const config = {
+    theme: "fruit",
+    mode: "random",
+    count: 9,
+    wish: THEMES.fruit.normals[0]
+  };
+
   let state = {};
 
   const $ = id => document.getElementById(id);
   const boardEl = $("board"), boxAreaEl = $("boxArea"), tipEl = $("tip"),
-        actionsEl = $("actions"), overlayEl = $("overlay");
+        actionsEl = $("actions"), overlayEl = $("overlay"), setOverlayEl = $("setOverlay");
 
-  function rand(n){ return Math.floor(Math.random()*n); }
-  function pick(arr){ return arr[rand(arr.length)]; }
+  const rand = n => Math.floor(Math.random()*n);
+  const pick = arr => arr[rand(arr.length)];
+  const curTheme = () => THEMES[config.theme];
+
+  function getStartCount(){
+    if(config.mode === "manual") return config.count;
+    const r = Math.random();
+    return r < 0.15 ? 2 : (r < 0.55 ? 4 : 9);
+  }
+  function rollFruit(){
+    const t = curTheme();
+    if(Math.random() < HIDDEN_RATE) return t.hidden;
+    return pick(t.normals);
+  }
 
   // ===== 开局 =====
   function newRound(){
-    const r = Math.random();
-    const startCount = r < 0.15 ? 2 : (r < 0.55 ? 4 : 9);
+    const t = curTheme();
+    const startCount = getStartCount();
+    const wish = config.mode === "manual" ? config.wish : pick(t.normals);
     state = {
-      wish: pick(FRUITS),
-      boxes: startCount,          // 待拆盲盒数
-      fruits: [],                 // 台面水果 {id, type}
-      pairs: 0,                   // 碰对数
-      clears: 0,                  // 清台次数
-      phase: "open",              // open=拆包中, match=可碰, end=结束
+      theme: config.theme,
+      wish,
+      hidden: t.hidden,
+      startCount,
+      milkLimit: MILK_LIMIT[startCount] || 1,
+      milkUsed: 0,
+      boxes: startCount,
+      fruits: [],
+      pairs: 0,
+      clears: 0,
+      totalFruits: 0,
+      hiddenCount: 0,    // 本单拆出隐藏次数
+      wishCount: 0,      // 本单许愿中次数
+      clearBonusTotal: 0, // 本单清台累计奖励包数
+      phase: "open",
       ended: false,
-      uid: 0,
-      wishTriggered: false        // 本轮是否已提示许愿（仅用于飘字节流，不影响加包）
+      uid: 0
     };
     overlayEl.classList.remove("show");
     renderAll();
@@ -195,20 +310,17 @@
 
   // ===== 渲染 =====
   function renderAll(){
-    renderWish();
-    renderStats();
-    renderBoxes();
-    renderBoard();
-    renderActions();
+    renderWish(); renderStats(); renderBoxes(); renderBoard(); renderActions();
   }
-
-  function renderWish(){ $("wishFruit").textContent = state.wish; }
+  function renderWish(){
+    $("wishFruit").textContent = state.wish;
+    $("hiddenFruit").textContent = state.hidden; // 顶部直接显示隐藏真身？见下方说明
+  }
   function renderStats(){
     $("statPairs").textContent = state.pairs;
     $("statBoxes").textContent = state.boxes;
     $("statClear").textContent = state.clears;
   }
-
   function renderBoxes(){
     boxAreaEl.innerHTML = "";
     if(state.boxes <= 0){
@@ -226,12 +338,12 @@
       boxAreaEl.appendChild(b);
     }
   }
-
   function renderBoard(){
     boardEl.innerHTML = "";
     state.fruits.forEach(f => {
       const d = document.createElement("div");
       d.className = "fruit";
+      if(f.type === state.hidden) d.classList.add("hidden-fruit");
       d.dataset.id = f.id;
       d.dataset.type = f.type;
       d.textContent = f.type;
@@ -240,26 +352,30 @@
     });
     updateHints();
   }
-
   function renderActions(){
     actionsEl.innerHTML = "";
     if(state.ended) return;
-
     if(state.phase === "match" && state.boxes === 0){
-      // 结束本单 / 奶一口
       const btnMilk = document.createElement("button");
       btnMilk.className = "btn green";
       btnMilk.textContent = "🍼 奶一口";
       btnMilk.addEventListener("click", milkOne);
+      if(state.milkUsed < state.milkLimit) btnMilk.classList.add("breath");
+
       const btnEnd = document.createElement("button");
       btnEnd.className = "btn";
       btnEnd.textContent = "结束这单";
       btnEnd.addEventListener("click", endRound);
+
       actionsEl.appendChild(btnMilk);
       actionsEl.appendChild(btnEnd);
+
+      if(state.milkUsed < state.milkLimit){
+        const left = state.milkLimit - state.milkUsed;
+        setTip(`还可以奶 ${left} 口哦～（已奶 ${state.milkUsed}/${state.milkLimit}）`);
+      }
     }
   }
-
   function setTip(t){ tipEl.textContent = t; }
 
   // ===== 拆包 =====
@@ -268,24 +384,29 @@
     if(btn.dataset.busy) return;
     btn.dataset.busy = "1";
     btn.classList.add("opening");
-    const type = pick(FRUITS);
+    const type = rollFruit();
 
     setTimeout(() => {
       state.boxes--;
+      state.totalFruits++;
       state.fruits.push({ id: ++state.uid, type });
       let msg = `拆到 ${type}！`;
 
-      // 许愿款 +1
-      if(type === state.wish){
+      if(type === state.hidden){
         state.boxes++;
+        state.hiddenCount++;
+        msg += ` 隐藏款！+1 包 ✨`;
+        floatText(btn, "隐藏！+1 包", true);
+      } else if(type === state.wish){
+        state.boxes++;
+        state.wishCount++;
         msg += ` 许愿中！+1 包 🎉`;
-        floatText(btn, "+1 包");
+        floatText(btn, "许愿 +1 包");
       }
 
       renderAll();
       setTip(msg);
 
-      // 拆完所有盲盒 → 进入碰阶段
       if(state.boxes <= 0){
         state.phase = "match";
         renderAll();
@@ -298,39 +419,37 @@
   function milkOne(){
     if(state.phase !== "match") return;
     state.boxes += 1;
+    state.milkUsed++;
     state.phase = "open";
     renderAll();
     setTip("奶一口！再拆一个～");
   }
 
-  // ===== 拖动碰 =====
-  let dragEl = null, dragType = null, startX=0, startY=0, offsetX=0, offsetY=0;
-
-  function attachDrag(el){
-    el.addEventListener("pointerdown", onDown);
-  }
+  // ===== 拖动 =====
+  let dragEl = null, dragType = null, offsetX=0, offsetY=0;
+  function attachDrag(el){ el.addEventListener("pointerdown", onDown); }
 
   function onDown(e){
     if(state.phase !== "match") return;
-    const el = e.currentTarget;
-    // 有别的正在拖，忽略
     if(dragEl) return;
+    const el = e.currentTarget;
     dragEl = el; dragType = el.dataset.type;
     const rect = el.getBoundingClientRect();
-    startX = rect.left; startY = rect.top;
     offsetX = e.clientX - rect.left;
     offsetY = e.clientY - rect.top;
 
-    // 原地留占位，防止其他水果补位
     const ghost = document.createElement("div");
     ghost.className = "fruit ghost-placeholder";
     ghost.style.width = rect.width + "px";
     ghost.style.height = rect.height + "px";
     el.parentNode.insertBefore(ghost, el.nextSibling);
+
+    el.classList.add("dragging");
+    el.style.width = rect.width + "px";
     el.style.height = rect.height + "px";
     el.style.position = "fixed";
-    el.style.left = startX + "px";
-    el.style.top = startY + "px";
+    el.style.left = rect.left + "px";
+    el.style.top = rect.top + "px";
     el.style.zIndex = "50";
 
     el.setPointerCapture && el.setPointerCapture(e.pointerId);
@@ -350,86 +469,75 @@
     document.removeEventListener("pointerup", onUp);
     document.removeEventListener("pointercancel", onUp);
     if(!dragEl) return;
+    const el = dragEl; dragEl = null;
 
-    const el = dragEl;
-    dragEl = null;
-
-    // 找到落点下的水果（排除自己）
     el.style.pointerEvents = "none";
     const target = document.elementFromPoint(e.clientX, e.clientY);
     el.style.pointerEvents = "";
-
     const targetFruit = target && target.closest ? target.closest(".fruit") : null;
 
     if(targetFruit && targetFruit.dataset.id !== el.dataset.id){
       if(targetFruit.dataset.type === dragType){
-        // 碰成功
         doMatch(el, targetFruit);
         return;
       } else {
-        // 不同水果：弹回 + 抖动
         returnToSlot(el, true);
         return;
       }
     }
-    // 没落在水果上：弹回
     returnToSlot(el, false);
   }
 
-  // 归位：重建台面最省事（重置样式）
+  function removeGhost(el){
+    const g = el.parentNode && el.parentNode.querySelector(".ghost-placeholder");
+    if(g) g.remove();
+  }
+
   function returnToSlot(el, shake){
     el.classList.remove("dragging");
     el.style = "";
-    const g = el.parentNode.querySelector(".ghost-placeholder");
-    if(g) g.remove();
+    removeGhost(el);
     if(shake){
       el.classList.add("shake-back");
       setTimeout(()=>el.classList.remove("shake-back"), 300);
     }
   }
 
-  // ===== 碰成功 =====
   function doMatch(el, targetFruit){
     const idA = Number(el.dataset.id);
     const idB = Number(targetFruit.dataset.id);
-
-    // 飘字位置
     const r = targetFruit.getBoundingClientRect();
     floatAt(r.left + r.width/2, r.top, "碰！+1 包");
 
-    // 标记消失动画
     el.style = "";
     el.classList.remove("dragging");
-    const g = el.parentNode.querySelector(".ghost-placeholder");
-    if(g) g.remove();
+    removeGhost(el);
     el.classList.add("pop");
     targetFruit.classList.add("pop");
 
     const type = el.dataset.type;
 
     setTimeout(() => {
-      // 从台面移除
       state.fruits = state.fruits.filter(f => f.id !== idA && f.id !== idB);
       state.pairs++;
-      state.boxes++;            // 每碰一对 +1 包
+      state.boxes++;
       renderAll();
       setTip(`碰掉一对 ${type}！+1 包`);
       checkClearOrMatch();
     }, 300);
   }
 
-  // ===== 清台 / 可碰检测 =====
+  // ===== 清台 / 阶段 =====
   function checkClearOrMatch(){
-    // 台面空 = 清台（不要求盲盒为 0）
     if(state.fruits.length === 0 && state.pairs > 0){
       state.clears++;
       state.boxes += CLEAR_BONUS;
+      state.clearBonusTotal += CLEAR_BONUS;
       state.phase = "open";
       renderAll();
       setTip(`清台啦！+${CLEAR_BONUS} 包 🎉`);
       return;
     }
-    // 先判断台面还有没有可碰的，有就留在碰阶段
     const typesNow = state.fruits.map(f=>f.type);
     const stillHasPair = typesNow.some((t,i)=>typesNow.indexOf(t,i+1) !== -1);
     if(stillHasPair){
@@ -438,48 +546,32 @@
       setTip("继续碰！盲盒先攒着～");
       return;
     }
-    // 没可碰的了，有盲盒就去拆
     if(state.boxes > 0){
       state.phase = "open";
       renderAll();
       setTip("碰完啦，去拆攒下的盲盒吧～");
       return;
     }
-    // 没盲盒，有可碰 → 碰阶段
-    const types = state.fruits.map(f=>f.type);
-    const hasPair = types.some((t,i)=>types.indexOf(t,i+1) !== -1);
-    if(hasPair){
-      state.phase = "match";
-      renderAll();
-      setTip("拖相同水果碰一碰！");
-      return;
-    }
-    // 没盲盒、没可碰 → 本轮结束（等待奶一口/结束）
     state.phase = "match";
     renderAll();
-    if(state.fruits.length === 0 && state.pairs > 0){
-      // 台上已空
-      setTip("台面空空，点「奶一口」或「结束这单」");
+    if(state.milkUsed < state.milkLimit){
+      const left = state.milkLimit - state.milkUsed;
+      setTip(`还可以奶 ${left} 口哦～（已奶 ${state.milkUsed}/${state.milkLimit}）`);
     } else {
-      setTip("没有可碰的啦，点「奶一口」或「结束这单」");
+      setTip("奶满啦～点「奶一口」还能继续，或「结束这单」");
     }
   }
 
-  // 可碰高亮
   function updateHints(){
     const els = boardEl.querySelectorAll(".fruit");
     const countMap = {};
-    els.forEach(el => {
-      const t = el.dataset.type;
-      countMap[t] = (countMap[t]||0) + 1;
-    });
+    els.forEach(el => { const t = el.dataset.type; countMap[t]=(countMap[t]||0)+1; });
     els.forEach(el => {
       if(countMap[el.dataset.type] >= 2) el.classList.add("hint");
       else el.classList.remove("hint");
     });
   }
 
-  // ===== 结束本单 =====
   function endRound(){
     if(state.ended) return;
     state.ended = true;
@@ -487,18 +579,23 @@
     renderAll();
     $("modalTitle").textContent = "本单结束啦！";
     $("modalText").innerHTML =
-      `共碰了 <b>${state.pairs}</b> 对<br>清台 <b>${state.clears}</b> 次<br>台面还剩 ${state.fruits.length} 个水果`;
+      `本单开局：拍一拆 <b>${state.startCount}</b><br>` +
+      `一共拆出 <b>${state.totalFruits}</b> 个<br>` +
+      `共碰了 <b>${state.pairs}</b> 对<br>` +
+      `清台 <b>${state.clears}</b> 次（+${state.clearBonusTotal} 包）<br>` +
+      `隐藏出了 <b>${state.hiddenCount}</b> 个<br>` +
+      `许愿中了 <b>${state.wishCount}</b> 次<br>` +
+      `台面还剩 ${state.fruits.length} 个`;
     overlayEl.classList.add("show");
   }
 
-  // ===== 飘字 =====
-  function floatText(el, txt){
+  function floatText(el, txt, purple){
     const r = el.getBoundingClientRect();
-    floatAt(r.left + r.width/2, r.top, txt);
+    floatAt(r.left + r.width/2, r.top, txt, purple);
   }
-  function floatAt(x, y, txt){
+  function floatAt(x, y, txt, purple){
     const d = document.createElement("div");
-    d.className = "float-score";
+    d.className = "float-score" + (purple ? " purple" : "");
     d.textContent = txt;
     d.style.left = x + "px";
     d.style.top = y + "px";
@@ -507,10 +604,52 @@
     setTimeout(()=>d.remove(), 800);
   }
 
-  // ===== 绑定 =====
+  // ===== 设置 =====
+  function openSettings(){ renderSettings(); setOverlayEl.classList.add("show"); }
+  function closeSettings(){ setOverlayEl.classList.remove("show"); }
+
+  function renderSettings(){
+    document.querySelectorAll("#themeSeg button").forEach(b=>{
+      b.classList.toggle("active", b.dataset.theme === config.theme);
+    });
+    document.querySelectorAll("#modeSeg button").forEach(b=>{
+      b.classList.toggle("active", b.dataset.mode === config.mode);
+    });
+    $("manualSection").classList.toggle("hidden", config.mode !== "manual");
+    document.querySelectorAll("#countRow button").forEach(b=>{
+      b.classList.toggle("active", Number(b.dataset.count) === config.count);
+    });
+    const wishRow = $("wishRow");
+    wishRow.innerHTML = "";
+    curTheme().normals.forEach(f=>{
+      const b = document.createElement("button");
+      b.textContent = f;
+      if(f === config.wish) b.classList.add("active");
+      b.addEventListener("click", ()=>{ config.wish = f; renderSettings(); });
+      wishRow.appendChild(b);
+    });
+  }
+
+  $("btnSettings").addEventListener("click", openSettings);
+  $("btnApplyClose").addEventListener("click", closeSettings);
+  $("btnRestartNow").addEventListener("click", ()=>{ closeSettings(); newRound(); });
   $("btnRestart").addEventListener("click", newRound);
 
-  // 启动
+  document.querySelectorAll("#themeSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      config.theme = b.dataset.theme;
+      // 切主题时许愿款重置为该主题第一个普通款
+      config.wish = THEMES[config.theme].normals[0];
+      renderSettings();
+    });
+  });
+  document.querySelectorAll("#modeSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{ config.mode = b.dataset.mode; renderSettings(); });
+  });
+  document.querySelectorAll("#countRow button").forEach(b=>{
+    b.addEventListener("click", ()=>{ config.count = Number(b.dataset.count); renderSettings(); });
+  });
+
   newRound();
 })();
 </script>
