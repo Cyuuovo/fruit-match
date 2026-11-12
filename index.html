@@ -229,6 +229,52 @@
 (function(){
   "use strict";
 
+// ===== 合成音效引擎 =====
+  let audioCtx = null;
+  function getAudioCtx(){
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(AC) audioCtx = new AC();
+    }
+    if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+  function playTone(freq, duration, type, volume, when){
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    const t0 = ctx.currentTime + (when || 0);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.18, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.05);
+  }
+  const SFX = {
+    open(){   // 拆包：短促"啵"
+      playTone(520, 0.09, "sine", 0.16, 0);
+      playTone(780, 0.08, "sine", 0.12, 0.05);
+    },
+    match(){  // 碰掉："啪"两连
+      playTone(300, 0.07, "square", 0.12, 0);
+      playTone(620, 0.10, "triangle", 0.14, 0.04);
+    },
+    hidden(){ // 隐藏：上行"叮叮~"
+      playTone(660, 0.12, "sine", 0.16, 0);
+      playTone(880, 0.12, "sine", 0.16, 0.10);
+      playTone(1180, 0.18, "sine", 0.15, 0.20);
+    },
+    wish(){   // 许愿：上行两连，比隐藏柔和
+      playTone(700, 0.13, "triangle", 0.15, 0);
+      playTone(990, 0.18, "triangle", 0.14, 0.11);
+    }
+  };
+
   // ===== 主题配置：8 普通 + 1 隐藏 =====
   const THEMES = {
     fruit: {
@@ -385,6 +431,7 @@
     btn.dataset.busy = "1";
     btn.classList.add("opening");
     const type = rollFruit();
+    SFX.open();
 
     setTimeout(() => {
       state.boxes--;
@@ -395,11 +442,13 @@
       if(type === state.hidden){
         state.boxes++;
         state.hiddenCount++;
+        SFX.hidden();
         msg += ` 隐藏款！+1 包 ✨`;
         floatText(btn, "隐藏！+1 包", true);
       } else if(type === state.wish){
         state.boxes++;
         state.wishCount++;
+        SFX.wish();
         msg += ` 许愿中！+1 包 🎉`;
         floatText(btn, "许愿 +1 包");
       }
@@ -516,6 +565,7 @@
     targetFruit.classList.add("pop");
 
     const type = el.dataset.type;
+    SFX.match();
 
     setTimeout(() => {
       state.fruits = state.fruits.filter(f => f.id !== idA && f.id !== idB);
