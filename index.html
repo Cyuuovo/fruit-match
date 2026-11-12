@@ -200,6 +200,14 @@
     </div>
 
     <div class="set-section">
+      <div class="sec-title">音效</div>
+      <div class="seg" id="soundSeg">
+        <button data-sound="on">🔊 开</button>
+        <button data-sound="off">🔇 关</button>
+      </div>
+    </div>
+
+    <div class="set-section">
       <div class="sec-title">模式</div>
       <div class="seg" id="modeSeg">
         <button data-mode="manual">我来定</button>
@@ -247,6 +255,7 @@
     return audioCtx;
   }
   function playTone(freq, duration, type, volume, when){
+    if(!config.sound) return;
     const ctx = getAudioCtx();
     if(!ctx) return;
     const t0 = ctx.currentTime + (when || 0);
@@ -308,7 +317,8 @@
     theme: "fruit",
     mode: "random",
     count: 9,
-    wish: THEMES.fruit.normals[0]
+    wish: THEMES.fruit.normals[0],
+    sound: true
   };
 
   let state = {};
@@ -672,6 +682,9 @@
     document.querySelectorAll("#modeSeg button").forEach(b=>{
       b.classList.toggle("active", b.dataset.mode === config.mode);
     });
+    document.querySelectorAll("#soundSeg button").forEach(b=>{
+      b.classList.toggle("active", (b.dataset.sound === "on") === config.sound);
+    });
     $("manualSection").classList.toggle("hidden", config.mode !== "manual");
     document.querySelectorAll("#countRow button").forEach(b=>{
       b.classList.toggle("active", Number(b.dataset.count) === config.count);
@@ -702,6 +715,9 @@
   });
   document.querySelectorAll("#modeSeg button").forEach(b=>{
     b.addEventListener("click", ()=>{ config.mode = b.dataset.mode; renderSettings(); });
+  });
+  document.querySelectorAll("#soundSeg button").forEach(b=>{
+    b.addEventListener("click", ()=>{ config.sound = (b.dataset.sound === "on"); renderSettings(); });
   });
   document.querySelectorAll("#countRow button").forEach(b=>{
     b.addEventListener("click", ()=>{ config.count = Number(b.dataset.count); renderSettings(); });
