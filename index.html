@@ -287,7 +287,7 @@
     <div class="guide-list">
       <p>1. 确认小票后，从货架拿满盲盒</p >
       <p>2. 点盲盒拆水果</p >
-      <p>3. 拆完拖相同水果碰掉，每碰一对 +1 包</p >
+      <p>3. 拆完拖动相同水果碰掉，每碰一对 +1 包</p >
       <p>4. 拆到许愿款 / 隐藏款，各 +1 包</p >
       <p>5. 台面清空 = 清台，+3 包</p >
       <p>6. 没得碰了可以「奶一口」：可连续点，奶完点「去拿」再拿盲盒</p >
@@ -500,11 +500,19 @@
   }
   function renderShelf(){
     shelfAreaEl.innerHTML = "";
+    const isUndoMode = (state.phase === "match" && state.milkUsed > 0 && state.shelf > 0);
     const needTake = (state.phase === "shelf" && state.shelf > 0 && state.pending < state.batchSize);
-    shelfAreaEl.classList.toggle("active-hint", needTake);
+
+    shelfAreaEl.classList.toggle("active-hint", needTake || isUndoMode);
     shelfAreaEl.classList.toggle("empty", state.shelf <= 0);
 
-    $("shelfRemain").textContent = state.shelf > 0 ? `剩 ${state.shelf} 个` : "";
+    if(state.shelf <= 0){
+      $("shelfRemain").textContent = "";
+    } else if(isUndoMode){
+      $("shelfRemain").textContent = `剩 ${state.shelf} 个 · 可点撤回`;
+    } else {
+      $("shelfRemain").textContent = `剩 ${state.shelf} 个`;
+    }
 
     if(state.shelf <= 0){
       // 货架空：保留一摞灰掉的图标，不写字
@@ -529,7 +537,11 @@
       b.textContent = "🎁";
       stack.appendChild(b);
     }
-    stack.addEventListener("click", takeFromShelf);
+    if(isUndoMode){
+      stack.addEventListener("click", undoMilk);
+    } else {
+      stack.addEventListener("click", takeFromShelf);
+    }
     shelfAreaEl.appendChild(stack);
   }
   function renderBoxes(){
@@ -704,6 +716,16 @@ function goTakeBoxes(){
     state.pending = 0;
     renderAll();
     setTip(`去货架把 ${state.shelf} 个盒子都拿下来拆～`);
+  }
+
+function undoMilk(){
+    if(state.phase !== "match") return;
+    if(state.milkUsed <= 0 || state.shelf <= 0) return;
+    state.shelf--;
+    state.milkUsed--;
+    SFX.take();
+    renderAll();
+    setTip(`撤回一口～（已奶 ${state.milkUsed}${state.milkLimit>0?"/"+state.milkLimit:""}）`);
   }
 
   // ===== 拖动碰 =====
