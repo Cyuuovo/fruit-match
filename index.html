@@ -222,6 +222,9 @@
     70% { transform:translate(-50%,-70%) scale(1); opacity:1; }
     100% { transform:translate(-50%,-120%) scale(1); opacity:0; }
   }
+
+.guide-list { text-align:left; margin-bottom:18px; }
+  .guide-list p { font-size:13.5px; color:#8a6478; line-height:1.7; margin:0; padding:2px 0; }
 </style>
 </head>
 <body>
@@ -274,6 +277,23 @@
     <h2 id="modalTitle">本单结束啦！</h2>
     <p id="modalText"></p>
     <button class="btn" id="btnRestart">再来一单</button>
+  </div>
+</div>
+
+<!-- 玩法说明 -->
+<div class="overlay show" id="guideOverlay">
+  <div class="modal">
+    <h2>🎮 怎么玩</h2>
+    <div class="guide-list">
+      <p>1. 确认小票后，从货架拿满盲盒</p >
+      <p>2. 点盲盒拆水果</p >
+      <p>3. 拆完拖相同水果碰掉，每碰一对 +1 包</p >
+      <p>4. 拆到许愿款 / 隐藏款，各 +1 包</p >
+      <p>5. 台面清空 = 清台，+3 包</p >
+      <p>6. 没得碰了可以「奶一口」：可连续点，奶完点「去拿」再拿盲盒</p >
+      <p>7. 拍一拆四奶两口，拍一拆九奶三口；奶满后仍可继续奶</p >
+    </div>
+    <button class="btn green" id="btnGuideOk">我知道啦</button>
   </div>
 </div>
 
@@ -650,13 +670,13 @@
       setTip(msg);
 
       if(state.pending <= 0){
-        // 拆完当前这批，若有货架新增（许愿/隐藏），先回去拿
+        // 拆完当前这批，若货架有新增（许愿/隐藏/碰对攒的），一次性拿完
         if(state.shelf > 0){
           state.phase = "shelf";
-          state.batchSize = 1; // 许愿/隐藏各 +1，拿 1 个
+          state.batchSize = state.shelf; // 有多少拿多少
           state.pending = 0;
           renderAll();
-          setTip("有许愿/隐藏加的包，去货架拿 1 个～");
+          setTip(`去货架把 ${state.shelf} 个盒子都拿下来拆～`);
           return;
         }
         state.phase = "match";
@@ -999,7 +1019,13 @@ function firework(x, y, text){
   document.addEventListener("pointerdown", unlockAudio, { passive:true });
   document.addEventListener("touchstart", unlockAudio, { passive:true });
 
-  newRound();
+  // 启动：先弹玩法说明，点"我知道啦"后再开局（弹小票）
+  $("btnGuideOk").addEventListener("click", ()=>{
+    $("guideOverlay").classList.remove("show");
+    newRound();
+  });
+
+  // 初始不调用 newRound，等说明关掉再开
 })();
 </script>
 </body>
